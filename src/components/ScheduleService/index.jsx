@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Dialog,
@@ -20,7 +20,8 @@ export default function ScheduleService() {
     time: "",
     observation: "",
   });
-  
+
+  const [appointmentServices, setAppointmentServices] = useState([]);
   const handleOpen = () => setOpen(!open);
 
   const handleChange = (e) => {
@@ -29,17 +30,69 @@ export default function ScheduleService() {
   };
 
   const handleSubmit = async () => {
-    // Add your form submission logic here
-    console.log("Form Data Submitted:", formData);
     setOpen(false); // Close the dialog after submission
     
+    // Insert data into Supabase
     const { data, error } = await supabase
-    .from('appointment_services')
-    .insert([formData])
-    .select()
-    console.log(data)
-        
+      .from('appointment_services')
+      .insert([formData])
+      .select();
+
+    if (error) {
+      console.log("Error inserting service:", error.message);
+    } else {
+      await getServices(formData.date);
+      formData.name = "";
+      formData.service = "";
+      formData.date = "";
+      formData.time = "";
+      formData.observation = "";
+    }
+    setAppointmentServices([])
   };
+
+  const getServices = async (date) => {
+    if (!date) {
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('appointment_services')
+      .select()
+      .eq('date', date)
+      .order('time', { ascending: true });
+    setAppointmentServices(data);
+    if (error) {
+      console.log("Error fetching services:", error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (formData.date) {
+      getServices(formData.date);
+    }
+  }, [formData.date]);
+
+  const timeSlotsMorning = [
+    "07:20", "07:40", "08:00", "08:20", "08:40", "09:00", "09:20", "09:40", 
+    "10:00", "10:20", "10:40", "11:00", "11:20", "11:40"
+  ];
+
+  const timeSlotsAfternoon = [
+    "13:20", "14:00", "14:20", "14:40", "15:00", 
+    "15:20", "15:40", "16:00", "16:20", "16:40", "17:00", "17:20", "17:40", 
+    "18:00", "18:20", "18:40", "19:00", "19:20", "19:40"
+  ];
+
+  // Filtrando os horários da manhã disponíveis
+  const availableTimesMorning = timeSlotsMorning.filter((time) => 
+    !appointmentServices.some((service) => service.time === time)
+  );
+
+  // Filtrando os horários da tarde disponíveis
+  const availableTimesAfternoon = timeSlotsAfternoon.filter((time) => 
+    !appointmentServices.some((service) => service.time === time)
+  );
 
   return (
     <>
@@ -89,9 +142,9 @@ export default function ScheduleService() {
               className="p-2 border rounded-md"
             >
               <option value="">Selecione o serviço</option>
-              <option value="service1">Serviço 1</option>
-              <option value="service2">Serviço 2</option>
-              <option value="service3">Serviço 3</option>
+              <option value="Barba">Barba</option>
+              <option value="Corte">Corte</option>
+              <option value="Serviço 3">Serviço 3</option>
             </select>
             <Typography className="-mb-1" color="blue-gray" variant="h6">
               Data
@@ -103,16 +156,75 @@ export default function ScheduleService() {
               value={formData.date}
               onChange={handleChange}
             />
+            {appointmentServices && (  
+              <>
+              <Typography className="-mb-1" color="blue-gray" variant="h4">
+                Agendamentos parte da manhã
+              </Typography>
+              <div className="flex justify-between text-sm">
+                <div className="border-r-2 border-gray-400 pr-2">
+                  <Typography className="-mb-1" color="blue-gray" variant="h6">
+                    Agendamentos marcados
+                  </Typography>
+                  {appointmentServices.filter((service) => timeSlotsMorning.includes(service.time))
+                    .map((service) => (
+                      <div key={service.id}>
+                        {service.time} - {service.service} - {service.name}
+                      </div>
+                  ))}
+                </div>
+                <div className="pl-2">
+                  <Typography className="-mb-1" color="blue-gray" variant="h6">
+                    Agendamentos disponíveis
+                  </Typography>
+                  {availableTimesMorning.map((time) => (
+                    <div key={time}>{time} - <span className="text-green-500">Disponível</span></div>
+                  ))}
+                </div>
+              </div>
+
+              <Typography className="-mb-1" color="blue-gray" variant="h4">
+                Agendamentos da tarde
+              </Typography>
+              <div className="flex justify-between text-sm">
+                <div className="border-r-2 border-gray-400 pr-2">
+                  <Typography className="-mb-1" color="blue-gray" variant="h6">
+                    Agendamentos marcados
+                  </Typography>
+                  {appointmentServices.filter((service) => timeSlotsAfternoon.includes(service.time))
+                    .map((service) => (
+                      <div key={service.id}>
+                        {service.time} - {service.service} - {service.name}
+                      </div>
+                  ))}
+                </div>
+                <div className="pl-2">
+                  <Typography className="-mb-1" color="blue-gray" variant="h6">
+                    Agendamentos disponíveis
+                  </Typography>
+                  {availableTimesAfternoon.map((time) => (
+                    <div key={time}>{time} - <span className="text-green-500">Disponível</span></div>
+                  ))}
+                </div>
+              </div>
+              </>
+            )}
             <Typography className="-mb-1" color="blue-gray" variant="h6">
               Horário
             </Typography>
-            <Input
-              label="Hora"
-              type="time"
+            <select
               name="time"
               value={formData.time}
               onChange={handleChange}
-            />
+              className="p-2 border rounded-md"
+            >
+              <option value="">Selecione a hora</option>
+              {availableTimesMorning.concat(availableTimesAfternoon).map((time) => (
+                <option key={time} value={time}>
+                  {time}
+                </option>
+              ))}
+            </select>
             <Typography className="-mb-1" color="blue-gray" variant="h6">
               Observação
             </Typography>

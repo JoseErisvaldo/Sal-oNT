@@ -28,7 +28,7 @@ export default function Home() {
                 <div className="border-b-2 p-4 rounded ">
                     <span className="font-bold text-2xl">
                         Seja bem vindo ao seu espaco de agendamentos 
-                    </span> 
+  0                  </span> 
                     <br />  
 
                     <h3 className="text-2xl mt-3"> {JSON.parse(user).email}</h3>
@@ -59,7 +59,6 @@ export default function Home() {
                                     <td className={classTd}>{service.service}</td>
                                     <td className={classTd}>{service.time}</td>
                                     <td className={classTd}>{service.name}</td>
-                                    <td className={classTd}>{service.value}</td>
                                     <td className={classTd}>{service.observation}</td>
                                     <td className={classTd}>{service.status}</td>
                                 </tr>
