@@ -1,5 +1,3 @@
-
-import { Button } from "@material-tailwind/react";
 import Layout from "../../layout";
 import ScheduleService from "../../components/ScheduleService";
 import { useEffect, useState } from "react";
@@ -36,38 +34,8 @@ export default function Home() {
                 </div>
                 <div className="mt-6 flex flex-col gap-2">
                       <ScheduleService />   
-                    <Button color="green">Agendamentos hoje</Button>
-                    <Button color="red">Agendamentos amanhã</Button>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="mt-6">
-                        <thead>
-                            <tr className="border-b-2">
-                                <th className={classTr}>Data</th>
-                                <th className={classTr}>Serviço</th>
-                                <th className={classTr}>Horário</th>
-                                <th className={classTr}>Cliente</th>
-                                <th className={classTr}>Valor</th>
-                                <th className={classTr}>Observação</th>
-                                <th className={classTr}>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {services.map((service) => (
-                                <tr key={service.id}>
-                                    <td className={classTd}>{service.date}</td>
-                                    <td className={classTd}>{service.service}</td>
-                                    <td className={classTd}>{service.time}</td>
-                                    <td className={classTd}>{service.name}</td>
-                                    <td className={classTd}>{service.observation}</td>
-                                    <td className={classTd}>{service.status}</td>
-                                </tr>
-                            ))}
-                            
-                        </tbody>
-                    </table>
-                </div>
-              
+                
             </div>
         </Layout>
     )
