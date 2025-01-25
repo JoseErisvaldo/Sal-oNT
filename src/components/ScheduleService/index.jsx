@@ -154,6 +154,7 @@ export default function ScheduleService() {
               <option value="">Selecione o serviço</option>
               <option value="Barba">Barba</option>
               <option value="Corte">Corte</option>
+              <option value="Degrade navalhado">Degrade navalhado</option>
             </select>
             <Typography className="-mb-1" color="blue-gray" variant="h6">
               Data
