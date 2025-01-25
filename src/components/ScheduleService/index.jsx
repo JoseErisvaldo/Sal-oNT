@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import supabase from "../../supabase";
+import DeleteAppointment from "./DeleteAppointment";
 
 export default function ScheduleService() {
   const [open, setOpen] = useState(false);
@@ -22,6 +23,7 @@ export default function ScheduleService() {
   });
 
   const [appointmentServices, setAppointmentServices] = useState([]);
+
   const handleOpen = () => setOpen(!open);
 
   const handleChange = (e) => {
@@ -30,9 +32,8 @@ export default function ScheduleService() {
   };
 
   const handleSubmit = async () => {
-    setOpen(false); // Close the dialog after submission
+    setOpen(false);
     
-    // Insert data into Supabase
     const { data, error } = await supabase
       .from('appointment_services')
       .insert([formData])
@@ -42,13 +43,15 @@ export default function ScheduleService() {
       console.log("Error inserting service:", error.message);
     } else {
       await getServices(formData.date);
-      formData.name = "";
-      formData.service = "";
-      formData.date = "";
-      formData.time = "";
-      formData.observation = "";
     }
-    setAppointmentServices([])
+    
+    setFormData({
+      name: "",
+      service: "",
+      date: "",
+      time: "",
+      observation: "",
+    });
   };
 
   const getServices = async (date) => {
@@ -61,7 +64,11 @@ export default function ScheduleService() {
       .select()
       .eq('date', date)
       .order('time', { ascending: true });
-    setAppointmentServices(data);
+
+    if (data) {
+      setAppointmentServices(data);
+    }
+    
     if (error) {
       console.log("Error fetching services:", error.message);
     }
@@ -84,15 +91,18 @@ export default function ScheduleService() {
     "18:00", "18:20", "18:40", "19:00", "19:20", "19:40"
   ];
 
-  // Filtrando os horários da manhã disponíveis
   const availableTimesMorning = timeSlotsMorning.filter((time) => 
     !appointmentServices.some((service) => service.time === time)
   );
 
-  // Filtrando os horários da tarde disponíveis
   const availableTimesAfternoon = timeSlotsAfternoon.filter((time) => 
     !appointmentServices.some((service) => service.time === time)
   );
+
+  const handleDeleteSuccess = () => {
+    getServices(formData.date);
+    console.log("Agendamento excluído");
+  };
 
   return (
     <>
@@ -144,7 +154,6 @@ export default function ScheduleService() {
               <option value="">Selecione o serviço</option>
               <option value="Barba">Barba</option>
               <option value="Corte">Corte</option>
-              <option value="Serviço 3">Serviço 3</option>
             </select>
             <Typography className="-mb-1" color="blue-gray" variant="h6">
               Data
@@ -158,55 +167,63 @@ export default function ScheduleService() {
             />
             {appointmentServices && (  
               <>
-              <Typography className="-mb-1" color="blue-gray" variant="h4">
-                Agendamentos parte da manhã
-              </Typography>
-              <div className="flex justify-between text-sm">
-                <div className="border-r-2 border-gray-400 pr-2">
-                  <Typography className="-mb-1" color="blue-gray" variant="h6">
-                    Agendamentos marcados
-                  </Typography>
-                  {appointmentServices.filter((service) => timeSlotsMorning.includes(service.time))
-                    .map((service) => (
-                      <div key={service.id}>
-                        {service.time} - {service.service} - {service.name}
-                      </div>
-                  ))}
+                <Typography className="-mb-1" color="blue-gray" variant="h4">
+                  Agendamentos parte da manhã
+                </Typography>
+                <div className="flex justify-between text-sm">
+                  <div className="border-r-2 border-gray-400 pr-2">
+                    <Typography className="-mb-1" color="blue-gray" variant="h6">
+                      Agendamentos marcados
+                    </Typography>
+                    {appointmentServices.filter((service) => timeSlotsMorning.includes(service.time))
+                      .map((service) => (
+                        <div key={service.id} className="flex items-center justify-between border-b-2 border-gray-400 pb-2">
+                          <div>{service.time} - {service.service} - {service.name}</div>
+                          <DeleteAppointment 
+                            appointmentId={service.id} 
+                            onDeleteSuccess={handleDeleteSuccess} 
+                          />
+                        </div>
+                    ))}
+                  </div>
+                  <div className="pl-2">
+                    <Typography className="-mb-1" color="blue-gray" variant="h6">
+                      Agendamentos disponíveis
+                    </Typography>
+                    {availableTimesMorning.map((time) => (
+                      <div key={time}>{time} - <span className="text-green-500">Disponível</span></div>
+                    ))}
+                  </div>
                 </div>
-                <div className="pl-2">
-                  <Typography className="-mb-1" color="blue-gray" variant="h6">
-                    Agendamentos disponíveis
-                  </Typography>
-                  {availableTimesMorning.map((time) => (
-                    <div key={time}>{time} - <span className="text-green-500">Disponível</span></div>
-                  ))}
-                </div>
-              </div>
 
-              <Typography className="-mb-1" color="blue-gray" variant="h4">
-                Agendamentos da tarde
-              </Typography>
-              <div className="flex justify-between text-sm">
-                <div className="border-r-2 border-gray-400 pr-2">
-                  <Typography className="-mb-1" color="blue-gray" variant="h6">
-                    Agendamentos marcados
-                  </Typography>
-                  {appointmentServices.filter((service) => timeSlotsAfternoon.includes(service.time))
-                    .map((service) => (
-                      <div key={service.id}>
-                        {service.time} - {service.service} - {service.name}
-                      </div>
-                  ))}
+                <Typography className="-mb-1" color="blue-gray" variant="h4">
+                  Agendamentos da tarde
+                </Typography>
+                <div className="flex justify-between text-sm">
+                  <div className="border-r-2 border-gray-400 pr-2">
+                    <Typography className="-mb-1" color="blue-gray" variant="h6">
+                      Agendamentos marcados
+                    </Typography>
+                    {appointmentServices.filter((service) => timeSlotsAfternoon.includes(service.time))
+                      .map((service) => (
+                        <div key={service.id} className="flex items-center justify-between border-b-2 border-gray-400 pb-2">
+                          <div>{service.time} - {service.service} - {service.name}</div>
+                          <DeleteAppointment 
+                            appointmentId={service.id} 
+                            onDeleteSuccess={handleDeleteSuccess} 
+                          />
+                        </div>
+                    ))}
+                  </div>
+                  <div className="pl-2">
+                    <Typography className="-mb-1" color="blue-gray" variant="h6">
+                      Agendamentos disponíveis
+                    </Typography>
+                    {availableTimesAfternoon.map((time) => (
+                      <div key={time}>{time} - <span className="text-green-500">Disponível</span></div>
+                    ))}
+                  </div>
                 </div>
-                <div className="pl-2">
-                  <Typography className="-mb-1" color="blue-gray" variant="h6">
-                    Agendamentos disponíveis
-                  </Typography>
-                  {availableTimesAfternoon.map((time) => (
-                    <div key={time}>{time} - <span className="text-green-500">Disponível</span></div>
-                  ))}
-                </div>
-              </div>
               </>
             )}
             <Typography className="-mb-1" color="blue-gray" variant="h6">
@@ -240,9 +257,9 @@ export default function ScheduleService() {
           <Button variant="text" color="gray" onClick={handleOpen}>
             Cancelar
           </Button>
-          <Button variant="gradient" color="blue" onClick={handleSubmit}>
+          <a href="/home" variant="gradient" color="blue" onClick={handleSubmit}>
             Agendar
-          </Button>
+          </a>
         </DialogFooter>
       </Dialog>
     </>
