@@ -38,7 +38,7 @@ export default function DeleteAppointment({ appointmentId, onDeleteSuccess }) {
           </Typography>
         </DialogBody>
         <DialogFooter>
-          <Button variant="text" color="gray" onClick={handleOpen}>
+          <Button variant="text" color="gray" className="bg-white" onClick={handleOpen}>
             Cancelar
           </Button>
           <Button variant="gradient" color="red" onClick={handleDelete}>

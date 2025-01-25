@@ -254,7 +254,7 @@ export default function ScheduleService() {
           </div>
         </DialogBody>
         <DialogFooter className="space-x-2">
-          <Button variant="text" color="gray" onClick={handleOpen}>
+          <Button variant="text" color="gray" className="bg-white" onClick={handleOpen}>
             Cancelar
           </Button>
           <a href="/home" variant="gradient" color="blue" onClick={handleSubmit}>
