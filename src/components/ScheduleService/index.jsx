@@ -154,7 +154,7 @@ export default function ScheduleService() {
               name="service"
               value={formData.service}
               onChange={handleChange}
-              className="p-2 border rounded-md"
+              className="p-2 border rounded-md bg-white"
             >
               <option value="">Selecione o serviço</option>
               <option value="Barba">Barba</option>
@@ -255,7 +255,7 @@ export default function ScheduleService() {
               name="time"
               value={formData.time}
               onChange={handleChange}
-              className="p-2 border rounded-md"
+              className="p-2 border rounded-md bg-white"
             >
               <option value="">Selecione a hora</option>
               {availableTimesMorning.concat(availableTimesAfternoon).map((time) => (
