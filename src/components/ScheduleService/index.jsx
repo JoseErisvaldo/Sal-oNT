@@ -8,6 +8,7 @@ import {
   Input,
   Textarea,
   Typography,
+  Spinner,
 } from "@material-tailwind/react";
 import supabase from "../../supabase";
 import DeleteAppointment from "./DeleteAppointment";
@@ -21,7 +22,7 @@ export default function ScheduleService() {
     time: "",
     observation: "",
   });
-
+  const [isLoading, setIsLoading] = useState(false)
   const [appointmentServices, setAppointmentServices] = useState([]);
 
   const handleOpen = () => setOpen(!open);
@@ -55,10 +56,12 @@ export default function ScheduleService() {
   };
 
   const getServices = async (date) => {
+    setAppointmentServices([]);
     if (!date) {
       return;
     }
-
+    setIsLoading(true)
+    
     const { data, error } = await supabase
       .from('appointment_services')
       .select()
@@ -67,6 +70,8 @@ export default function ScheduleService() {
 
     if (data) {
       setAppointmentServices(data);
+      setIsLoading(false)
+      console.log('teste')
     }
     
     if (error) {
@@ -176,6 +181,14 @@ export default function ScheduleService() {
                     <Typography className="-mb-1" color="blue-gray" variant="h6">
                       Agendamentos marcados
                     </Typography>
+                    {isLoading && <p className=" flex items-center justify-between rounded bg-green-600 text-white p-2">
+                      Carregando <Spinner color="white" />
+                      </p>}
+                      {isLoading !== true && appointmentServices.length === 0 && (
+                        <p className=" flex items-center justify-between rounded bg-red-600 text-white p-2">
+                        Nenhum agendamento marcado
+                        </p>
+                      )}
                     {appointmentServices.filter((service) => timeSlotsMorning.includes(service.time))
                       .map((service) => (
                         <div key={service.id} className="flex items-center justify-between border-b-2 border-gray-400 pb-2">
@@ -205,6 +218,14 @@ export default function ScheduleService() {
                     <Typography className="-mb-1" color="blue-gray" variant="h6">
                       Agendamentos marcados
                     </Typography>
+                    {isLoading && <p className=" flex items-center justify-between rounded bg-green-600 text-white p-2">
+                      Carregando <Spinner color="white" />
+                      </p>}
+                      {isLoading !== true && appointmentServices.length === 0 && (
+                        <p className=" flex items-center justify-between rounded bg-red-600 text-white p-2">
+                        Nenhum agendamento marcado
+                        </p>
+                      )}
                     {appointmentServices.filter((service) => timeSlotsAfternoon.includes(service.time))
                       .map((service) => (
                         <div key={service.id} className="flex items-center justify-between border-b-2 border-gray-400 pb-2">
